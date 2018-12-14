@@ -1,0 +1,6 @@
+npm init
+npm install -g windows-build-tools
+npm install --save technicalindicators
+
+git init
+git remote add origin https://github.com/paskl/fxot.git
