@@ -1,6 +1,7 @@
 npm init
 npm install -g windows-build-tools
 npm install --save technicalindicators
+npm install --save-dev nodemon
 
 git init
 git remote add origin https://github.com/paskl/fxot.git
