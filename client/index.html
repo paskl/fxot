@@ -1,0 +1,47 @@
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+
+<div>
+  <a href="javascript:list_strategies()"> list_strategies </a> <br>
+  <a href="javascript:start_worker()"> start_worker </a> <br>
+  <a href="javascript:backtest_worker()"> backtest_worker </a> <br>
+  <a href="javascript:list_worker()"> list_worker </a> <br>
+</div>
+
+<script type="text/javascript">
+  // list_strategies()
+  // start_worker('strategy01')
+  // list_worker()
+  
+
+  function list_strategies() {
+    $.get('http://127.0.0.1:3000/strategy/list', res => {
+      console.log(res)
+    })
+  }
+
+  function start_worker(strategy) {
+    strat = strategy || 'strategy01'
+    $.get('http://127.0.0.1:3000/worker/start/'+strat, res => {
+      console.log(res)
+    })
+  }
+
+  function backtest_worker(strategy) {
+    strat = strategy || 'strategy01'
+    $.get('http://127.0.0.1:3000/worker/backtest/'+strat, res => {
+      console.log(res)
+    })
+  }
+
+  function list_worker() {
+    console.log('list')
+    $.get('http://127.0.0.1:3000/worker/list', res => {
+      console.log(res)
+    })    
+  }
+
+  function test() {
+    console.log('test')
+  }
+
+</script>

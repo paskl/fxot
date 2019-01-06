@@ -1,15 +1,20 @@
 'use strict';
+
 module.exports = function(app) {
-  var test = require('../controllers/controllertest');
+  const worker_c = require('../controllers/WorkerController')
+  const strategy_c = require('../controllers/StrategyController')
 
-  // todoList Routes
-  app.route('/test')
-    .get(test.test_get)
-    .post(test.test_post);
+  // GET LIST OF STRATEGIES
+  app.route('/strategy/list')
+    .get(strategy_c.list)
 
+  app.route('/worker/start/:strategyId')
+    .get(worker_c.start)
 
-  app.route('/test/:taskId')
-    .get(test.test_get_id);
-    // .put(test.update_a_task)
-    // .delete(test.delete_a_task);
-};
+  app.route('/worker/backtest/:strategyId')
+    .get(worker_c.backtest)
+
+  app.route('/worker/list')
+    .get(worker_c.list)
+
+}
