@@ -1,17 +1,19 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
 
 <div>
-  <a href="javascript:list_strategies()"> list_strategies </a> <br>
-  <a href="javascript:start_worker()"> start_worker </a> <br>
+  <a href="javascript:list_strategies()"> list strategies </a> <br>
+  <a href="javascript:start_worker()"> run strategy </a> <br>
   <a href="javascript:backtest_worker()"> backtest_worker </a> <br>
-  <a href="javascript:list_worker()"> list_worker </a> <br>
+  <a href="javascript:list_worker()"> list workers </a> <br>
 </div>
+<br><br>
+<div id="content"></div>
 
 <script type="text/javascript">
   // list_strategies()
   // start_worker('strategy01')
   // list_worker()
-  
+
 
   function list_strategies() {
     $.get('http://127.0.0.1:3000/strategy/list', res => {
@@ -21,27 +23,50 @@
 
   function start_worker(strategy) {
     strat = strategy || 'strategy01'
-    $.get('http://127.0.0.1:3000/worker/start/'+strat, res => {
+    $.get('http://127.0.0.1:3000/strategy/run/'+strat, res => {
       console.log(res)
     })
   }
 
   function backtest_worker(strategy) {
     strat = strategy || 'strategy01'
-    $.get('http://127.0.0.1:3000/worker/backtest/'+strat, res => {
+    $.get('http://127.0.0.1:3000/strategy/backtest/'+strat, res => {
       console.log(res)
     })
   }
 
   function list_worker() {
     console.log('list')
-    $.get('http://127.0.0.1:3000/worker/list', res => {
+    $.get('http://127.0.0.1:3000/workers/list', res => {
       console.log(res)
-    })    
+      code = ''
+      res.forEach( r => {
+        code += '<table><tr>'
+                +'<td>'+r.id+'<td>'
+                +'<td>'+r.pair+'|'+r.gran+'<td>'
+                +'<td>'+r.isRunning+'<td>'
+                +'<td><a href="javascript:kill_worker('+r.id+')"> kill </a> <td>'
+                +'<td><a href="javascript:viewLog_worker('+r.id+')"> logs </a> <td>'
+                +'</tr></table>'
+      })
+      write(code)
+    })
   }
 
-  function test() {
-    console.log('test')
+  function kill_worker(id){
+    $.get('http://127.0.0.1:3000/worker/kill/'+id, res => {
+      console.log(res)
+    })
+  }
+
+  function viewLog_worker(id){
+    $.get('http://127.0.0.1:3000/worker/viewLogs/'+id, res => {
+      console.log(res)
+    })
+  }
+
+  function write(content) {
+    $('#content').html(content)
   }
 
 </script>
