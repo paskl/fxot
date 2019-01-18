@@ -23,7 +23,7 @@ module.exports = function(app) {
   app.route('/worker/viewLogs/:workerId')
     .get(controller.viewLogsWorker)
 
-  // app.route('/worker/list')
-  //   .get(controller.list)
+  app.route('/datapoints/:pair')
+    .get(controller.datapoints)
 
 }

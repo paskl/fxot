@@ -1,72 +1,109 @@
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<!DOCTYPE html>
+<html>
+  <head>
+      <link rel="stylesheet" href="css/chart.css">
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+      <script src="http://d3js.org/d3.v4.min.js"></script>
+      <script src="http://techanjs.org/techan.min.js"></script>
+      <script src="js/dump.js"></script>
+      <script src="js/chart.js"></script>
+  </head>
 
-<div>
-  <a href="javascript:list_strategies()"> list strategies </a> <br>
-  <a href="javascript:start_worker()"> run strategy </a> <br>
-  <a href="javascript:backtest_worker()"> backtest_worker </a> <br>
-  <a href="javascript:list_worker()"> list workers </a> <br>
-</div>
-<br><br>
-<div id="content"></div>
-
-<script type="text/javascript">
-  // list_strategies()
-  // start_worker('strategy01')
-  // list_worker()
+  <body>
+    <div>
+      <a href="javascript:list_strategies()"> list strategies </a> <br>
+      <a href="javascript:start_worker()"> run strategy </a> <br>
+      <a href="javascript:backtest_worker()"> backtest_worker </a> <br>
+      <a href="javascript:list_worker()"> list workers </a> <br>
+      <a href="javascript:get_datapoints('EUR_JPY')"> get datapoints </a> <br>
+    </div>
+    <br><br>
+    <div id="content"></div>
+    <div id="chart"></div>
 
 
-  function list_strategies() {
-    $.get('http://127.0.0.1:3000/strategy/list', res => {
-      console.log(res)
-    })
-  }
+    <script type="text/javascript">
+      var url = 'http://127.0.0.1:3000/'
 
-  function start_worker(strategy) {
-    strat = strategy || 'strategy01'
-    $.get('http://127.0.0.1:3000/strategy/run/'+strat, res => {
-      console.log(res)
-    })
-  }
+      function list_strategies() {
+        $.get(url+'strategy/list', res => {
+          console.log(res)
+        })
+      }
 
-  function backtest_worker(strategy) {
-    strat = strategy || 'strategy01'
-    $.get('http://127.0.0.1:3000/strategy/backtest/'+strat, res => {
-      console.log(res)
-    })
-  }
+      function start_worker(strategy) {
+        strat = strategy || 'strategy01'
+        $.get(url+'strategy/run/'+strat, res => {
+          console.log(res)
+        })
+      }
 
-  function list_worker() {
-    console.log('list')
-    $.get('http://127.0.0.1:3000/workers/list', res => {
-      console.log(res)
-      code = ''
-      res.forEach( r => {
-        code += '<table><tr>'
-                +'<td>'+r.id+'<td>'
-                +'<td>'+r.pair+'|'+r.gran+'<td>'
-                +'<td>'+r.isRunning+'<td>'
-                +'<td><a href="javascript:kill_worker('+r.id+')"> kill </a> <td>'
-                +'<td><a href="javascript:viewLog_worker('+r.id+')"> logs </a> <td>'
-                +'</tr></table>'
-      })
-      write(code)
-    })
-  }
+      function backtest_worker(strategy) {
+        strat = strategy || 'strategy01'
+        $.get(url+'strategy/backtest/'+strat, res => {
+          console.log(res)
+        })
+      }
 
-  function kill_worker(id){
-    $.get('http://127.0.0.1:3000/worker/kill/'+id, res => {
-      console.log(res)
-    })
-  }
+      function list_worker() {
+        console.log('list')
+        $.get(url+'workers/list', res => {
+          console.log(res)
+          code = ''
+          res.forEach( r => {
+            code += '<table><tr>'
+                    +'<td>'+r.id+'<td>'
+                    +'<td>'+r.pair+'|'+r.gran+'<td>'
+                    +'<td>'+r.isRunning+'<td>'
+                    +'<td><a href="javascript:kill_worker('+r.id+')"> kill </a> <td>'
+                    +'<td><a href="javascript:viewLog_worker('+r.id+')"> logs </a> <td>'
+                    +'</tr></table>'
+          })
+          write(code)
+        })
+      }
 
-  function viewLog_worker(id){
-    $.get('http://127.0.0.1:3000/worker/viewLogs/'+id, res => {
-      console.log(res)
-    })
-  }
+      function kill_worker(id){
+        $.get(url+'worker/kill/'+id, res => {
+          console.log(res)
+        })
+      }
 
-  function write(content) {
-    $('#content').html(content)
-  }
+      function viewLog_worker(id){
+        $.get(url+'worker/viewLogs/'+id, res => {
+          console.log(res)
+        })
+      }
 
-</script>
+      function get_datapoints(pair){
+        $.get(url+'datapoints/'+pair+'?limit=300', res => {
+          createChart(res.data)
+        })
+      }
+
+      function write(content) {
+        $('#content').html(content)
+      }
+
+      function createChart(data){
+        var c = new Chart({
+            container: 'chart',
+            margin: { top: 20, right: 20, bottom: 30, left: 50 }
+        })
+        c.setData(data)
+
+        c.setLines([
+            { start: { date: new Date(2018, 6, 1, 20,19,0), value: 1.1667 }, end: { date: new Date(2018, 6, 1, 20,45,0), value: 1.1664 } }
+        ])
+        // c.addLine({ start: { date: new Date(2013, 10, 21), value: 43 }, end: { date: new Date(2014, 2, 17), value: 70.50 } })
+
+        c.setNotes([{ date: new Date(2018, 6, 1, 20,0,0), type: "sell", price: 1.1679 },
+                    { date: new Date(2018, 6, 1, 20,19,0), type: "buy", price: 1.1666 },
+                    { date: new Date(2018, 6, 1, 20,45,0), type: "buy", price: 1.1670 }])
+        // c.addNote( { date: tmpd("26-Dec-13"), type: "sell", price: 50, quantity: 1000 } )
+        c.draw()
+      }
+
+    </script>
+  </body>
+</html>

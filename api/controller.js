@@ -3,6 +3,8 @@
 // const strategy = require('../lib/strategy.js')
 // const Worker = require('../lib/worker.js')
 
+const localdata = require('../lib/localdata.js')
+
 const Pool = require('../lib/pool')
 
 const { fork } = require('child_process');
@@ -46,6 +48,16 @@ exports.viewLogsWorker = async (req, res) => {
         res.json(worker.logger)
     else
         res.json({error: 'worker unknown'})
+}
+
+exports.datapoints = async (req, res) => {
+    let pair = req.params.pair
+    console.log('[GET] /datapoints/'+pair)
+    let granulity = req.query.granulity
+    let from = new Date(2018, 6, 1, 18, 35, 0) // req.query.from
+    let limit = req.query.limit || 300
+    let dd = localdata.getAll('EUR_JPY', 'S5', from, limit)
+    res.json({data:dd})
 }
 
 
