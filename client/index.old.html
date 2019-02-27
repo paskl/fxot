@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <link rel="stylesheet" href="css/chart.css">
+
+      <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+      <script src="http://d3js.org/d3.v4.min.js"></script>
+      <script src="http://techanjs.org/techan.min.js"></script>
+
+      <!-- <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@0.13.0"></script> -->
+      <script src="js/ti.js"></script>
+
+      <script src="js/dump.js"></script>
+      <script src="js/chart.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <a href="javascript:list_strategies()"> list strategies </a> <br>
+      <a href="javascript:start_worker()"> run strategy </a> <br>
+      <a href="javascript:backtest_worker()"> backtest_worker </a> <br>
+      <a href="javascript:list_worker()"> list workers </a> <br>
+      <a href="javascript:get_datapoints('EUR_JPY')"> get datapoints </a> <br>
+    </div>
+    <br><br>
+    <div id="content"></div>
+    <div id="status"></div>
+    <div id="chart"></div>
+
+
+    <script type="text/javascript">
+      var url = 'http://127.0.0.1:3000/'
+
+      function list_strategies() {
+        $.get(url+'strategy/list', res => {
+          console.log(res)
+        })
+      }
+
+      function start_worker(strategy) {
+        strat = strategy || 'strategy01'
+        $.get(url+'strategy/run/'+strat, res => {
+          console.log(res)
+        })
+      }
+
+      function backtest_worker(strategy) {
+        strat = strategy || 'strategy01'
+        $.get(url+'strategy/backtest/'+strat, res => {
+          console.log(res)
+        })
+      }
+
+      function list_worker() {
+        console.log('list')
+        $.get(url+'workers/list', res => {
+          console.log(res)
+          code = ''
+          res.forEach( r => {
+            code += '<table><tr>'
+                    +'<td>'+r.id+'</td>'
+                    +'<td>'+r.pair+'|'+r.gran+'</td>'
+                    +'<td>'+r.isRunning+'</td>'
+                    +'<td><a href="javascript:kill_worker('+r.id+')"> kill </a> </td>'
+                    +'<td><a href="javascript:viewLog_worker('+r.id+')"> logs </a> </td>'
+                    +'<td><a href="javascript:drawLog_worker('+r.id+')"> draw </a> </td>'
+                    +'</tr></table>'
+          })
+          write(code)
+        })
+      }
+
+      function kill_worker(id){
+        $.get(url+'worker/kill/'+id, res => {
+          console.log(res)
+        })
+      }
+
+      function viewLog_worker(id){
+        $.get(url+'worker/viewLogs/'+id, res => {
+          console.log(res)
+        })
+      }
+
+var graph_cursor = 0
+var c = new Chart()
+var limit = 500
+      function drawLog_worker(id){
+        graph_cursor += 100
+        $.get(url+'worker/viewLogs/'+id, wl => {
+
+          let from = new Date(wl.status.sample_start).getTime() + (60000*graph_cursor)
+
+          drawStatus(wl)
+          // $('#status').html( JSON.stringify(wl.status))
+
+          $.get(url+'datapoints/'+wl.status.pair+'?from='+from+'&limit='+limit, dp => {
+
+            let date = {
+              start: new Date(dp.data[0][0]),
+              end: new Date(dp.data[dp.data.length-1][0])
+            }
+
+            let res = indicator_sma(dp.data, 50)
+            let res2 = indicator_sma(dp.data, 200)
+
+            // console.log(dp.data)
+            c.setData(dp.data)
+            c.setLines(res)
+            c.addLine(res2)
+
+            // draw events
+            let notes = []
+            wl.events.forEach( e => {
+              let evd = new Date(e.time)
+              if( evd > date.start && evd < date.end){
+                notes.push({date: evd, type: e.type, price: e.price})
+              }
+            })
+            c.setNotes(notes)
+            c.draw()
+          })
+        })
+      }
+
+      function drawStatus(wl){
+        let st = wl.status
+        let conts = 'backtesting - '+st.pair+' on '+new Date(st.sample_start)+' to '+new Date(st.sample_done)+'<br>'
+        conts += 'execution time : '+ (st.run_done - st.run_start)/1000+' secs <br>'
+        conts += 'nb iterations : '+ st.nb_iter +'<br>'
+
+        $('#status').html(conts)
+        console.log(wl.status)
+      }
+
+
+
+      function get_datapoints(pair, from,limit){
+        limit = limit || 500
+        $.get(url+'datapoints/'+pair+'?from='+from+'&limit='+limit, res => {
+          let c = new Chart()
+          c.setData(res.data)
+          c.draw()
+          // createChart(res.data)
+        })
+      }
+
+      function write(content) {
+        $('#content').html(content)
+      }
+
+      function get_closes(dp){
+        let temp = []
+        dp.forEach( p => temp.push( parseFloat(p[4]) ) )
+        return temp
+      }
+
+      function indicator_sma(data, period){
+        let indic = SMA.calculate({period : period, values : get_closes(data)})
+        let res = []
+        let delta = data.length - indic.length
+        indic.forEach( (v, i) => {
+          if( i+delta < data.length )
+          res.push({
+            date: new Date(data[i+ delta][0]),
+            value: v
+           })
+        })
+        return res
+      }
+
+// Math.round(parseFloat(p[4]) * 10000) / 10000
+      // function createChart(data){
+      //   var c = new Chart()
+      //   c.setData(data)
+
+        // c.setLines([
+        //     { start: { date: new Date(2018, 6, 1, 20,19,0), value: 1.1667 }, end: { date: new Date(2018, 6, 1, 20,45,0), value: 1.1664 } }
+        // ])
+      //   // c.addLine({ start: { date: new Date(2013, 10, 21), value: 43 }, end: { date: new Date(2014, 2, 17), value: 70.50 } })
+
+      //   c.setNotes([{ date: new Date(2018, 6, 1, 20,0,0), type: "sell", price: 1.1679 },
+      //               { date: new Date(2018, 6, 1, 20,19,0), type: "buy", price: 1.1666 },
+      //               { date: new Date(2018, 6, 1, 20,45,0), type: "buy", price: 1.1670 }])
+      //   // c.addNote( { date: tmpd("26-Dec-13"), type: "sell", price: 50, quantity: 1000 } )
+      //   c.draw()
+      // }
+
+
+//       let test = []
+
+// for(let j=0; j<250; j++) test.push({
+//         date: new Date(1530438000000+60000*j),
+//         value: 1.1670+(j%10)/1000
+//     })
+
+// console.log(test)
+
+    </script>
+  </body>
+</html>

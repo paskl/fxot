@@ -18,8 +18,7 @@ class Candle{
     }
 
     initFromLocal(opt){
-        let a = opt[0]
-        this.time = new Date(a.slice(0,4)+"-"+a.slice(4,6)+"-"+a.slice(6,8)+"T"+a.slice(9,11)+":"+a.slice(11,13)+":"+a.slice(13,15)+"Z")
+        this.time = new Date(opt[0])
         this.open = opt[1]
         this.high = opt[2]
         this.low = opt[3]

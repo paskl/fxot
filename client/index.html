@@ -1,34 +1,101 @@
 <!DOCTYPE html>
 <html>
   <head>
-      <link rel="stylesheet" href="css/chart.css">
+      <link rel="stylesheet" href="css/framework.css">
+      <link rel="stylesheet" href="css/main.css">
       <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
-      <script src="http://d3js.org/d3.v4.min.js"></script>
-      <script src="http://techanjs.org/techan.min.js"></script>
-      <script src="js/dump.js"></script>
-      <script src="js/chart.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/riot-route@x.x.x/dist/route.min.js"></script>
+      <script src="js/mustache.min.js"></script>
+      <script src="js/framework.js"></script>
   </head>
 
   <body>
-    <div>
-      <a href="javascript:list_strategies()"> list strategies </a> <br>
-      <a href="javascript:start_worker()"> run strategy </a> <br>
-      <a href="javascript:backtest_worker()"> backtest_worker </a> <br>
-      <a href="javascript:list_worker()"> list workers </a> <br>
-      <a href="javascript:get_datapoints('EUR_JPY')"> get datapoints </a> <br>
+
+    <!-- TARGETS -->
+    <div class="menu">
+      TRADING ROBOTS
+      <target name="menu"></target>
     </div>
-    <br><br>
-    <div id="content"></div>
-    <div id="chart"></div>
+    <div class="main">
+      <target name="main"></target>
+    </div>
+    <div class="sheet">
+      <target name="sheet"></target>
+    </div>
+
+
+    <!-- HOME -->
+    <component name="strategy_index">
+      <a href="#/strategy/{{id}}">
+        <div> {{ name }} </div>
+        <div> {{ lastname }} </div>
+      </a>
+    </component>
+
+    <!-- STRATEGY -->
+    <component name="text">
+      <div> {{content}} </div>
+    </component>
+
+    <component name="strategy_show">
+      <div> This is my Strategy </div>
+    </component>
+
+    <component name="button">
+      <div class="button button-g" onclick="{{func.name}}('{{func.param}}')"> {{label}} </div>
+    </component>
 
 
     <script type="text/javascript">
-      var url = 'http://127.0.0.1:3000/'
 
-      function list_strategies() {
-        $.get(url+'strategy/list', res => {
-          console.log(res)
-        })
+      $(document).ready( ()=> {
+        framex.init(params)
+        /// TO REMOVE : permet le rafraichissement par F5 pour test
+        route('/')
+        params.pages[0].action()
+      })
+
+      const Pages = {
+          list_of_strategies: async () => {
+            framex.reset()
+            let data = await framex.source('strategy/list')
+              console.log(data)
+            data.list.forEach( s => {
+              framex.write('main', 'strategy_index', { name: s.name, id:s.id})
+            })
+          },
+
+          strategy_view: async (strat_id) => {
+            framex.reset()
+            let data = await framex.source('strategy/view/'+strat_id)
+
+            framex.write('main', 'strategy_show')
+            framex.write('main', 'button', {label:'Backtest', func: { name:'backtest_worker', param: strat_id } })
+            framex.write('main', 'button', {label:'start_worker', func: strat_id })
+          },
+
+          run_page: async() => {
+
+          },
+
+          backtest_wait: async(id) => {
+            framex.reset()
+            framex.write('main', 'text', {content: 'BACKTEST IN PROGRESS ...'})
+
+            // Start listening to new change
+            let ret = await framex.waitFor('worker/status/'+id)
+            route('/backtest/result/'+id)
+          },
+
+          backtest_result: async(id) => {
+            framex.reset()
+            framex.write('main', 'text', {content: ' BACKTEST '+id+' RESULT'})
+
+            let data = await framex.source('backtest/result/'+id)
+            console.log(data)
+
+          }
+
       }
 
       function start_worker(strategy) {
@@ -38,72 +105,30 @@
         })
       }
 
-      function backtest_worker(strategy) {
-        strat = strategy || 'strategy01'
-        $.get(url+'strategy/backtest/'+strat, res => {
-          console.log(res)
-        })
+      async function backtest_worker(strategyId) {
+        let result = await framex.source('worker/backtest/'+strategyId)
+        let workerId = result.id
+        route('/backtest/wait/'+workerId) // go to wait page
       }
 
-      function list_worker() {
-        console.log('list')
-        $.get(url+'workers/list', res => {
-          console.log(res)
-          code = ''
-          res.forEach( r => {
-            code += '<table><tr>'
-                    +'<td>'+r.id+'<td>'
-                    +'<td>'+r.pair+'|'+r.gran+'<td>'
-                    +'<td>'+r.isRunning+'<td>'
-                    +'<td><a href="javascript:kill_worker('+r.id+')"> kill </a> <td>'
-                    +'<td><a href="javascript:viewLog_worker('+r.id+')"> logs </a> <td>'
-                    +'</tr></table>'
-          })
-          write(code)
-        })
-      }
-
-      function kill_worker(id){
-        $.get(url+'worker/kill/'+id, res => {
-          console.log(res)
-        })
-      }
-
-      function viewLog_worker(id){
-        $.get(url+'worker/viewLogs/'+id, res => {
-          console.log(res)
-        })
-      }
-
-      function get_datapoints(pair){
-        $.get(url+'datapoints/'+pair+'?limit=300', res => {
-          createChart(res.data)
-        })
-      }
-
-      function write(content) {
-        $('#content').html(content)
-      }
-
-      function createChart(data){
-        var c = new Chart({
-            container: 'chart',
-            margin: { top: 20, right: 20, bottom: 30, left: 50 }
-        })
-        c.setData(data)
-
-        c.setLines([
-            { start: { date: new Date(2018, 6, 1, 20,19,0), value: 1.1667 }, end: { date: new Date(2018, 6, 1, 20,45,0), value: 1.1664 } }
-        ])
-        // c.addLine({ start: { date: new Date(2013, 10, 21), value: 43 }, end: { date: new Date(2014, 2, 17), value: 70.50 } })
-
-        c.setNotes([{ date: new Date(2018, 6, 1, 20,0,0), type: "sell", price: 1.1679 },
-                    { date: new Date(2018, 6, 1, 20,19,0), type: "buy", price: 1.1666 },
-                    { date: new Date(2018, 6, 1, 20,45,0), type: "buy", price: 1.1670 }])
-        // c.addNote( { date: tmpd("26-Dec-13"), type: "sell", price: 50, quantity: 1000 } )
-        c.draw()
+      const params = {
+        pages: [
+          { route:'/', action: Pages.list_of_strategies },
+          { route: '/strategy../*', action: Pages.strategy_view },
+          { route: '/backtest/wait../*', action: Pages.backtest_wait },
+          { route: '/backtest/result../*', action: Pages.backtest_result },
+        ]
       }
 
     </script>
+
+    <style type="text/css">
+      component{
+        display:none;
+      }
+    </style>
   </body>
+
+
+
 </html>

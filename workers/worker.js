@@ -1,18 +1,10 @@
 /* worker.js */
 
-// const Listener = require('./listener.js')
-// const Pair = require('./pair.js')
-// const Wallet = require('./wallet.js')
-// const Logger = require('./logger.js')
-
-// const oanda = require('./oanda.js')
-// const localdata = require('./localdata.js')
-
 const { fork } = require('child_process')
 
 class Worker {
 
-    constructor(pair, gran){
+    constructor(context, pair, gran){
         this.id = new Date().getTime()
         this.proc = null
         this.pair = pair
@@ -20,24 +12,30 @@ class Worker {
         this.isBacktest = null
         this.isRunning = false
         this.forceKill = false
-        this.logger = { status: {}, result: {}, events: {}, iter:[]}
+        this.status = 'new'
+        //
+        this.context = context
+        this.logger = { status: {}, events: [] }
         // this.audit = new Logger()
         // this.wallet = new W allet()
     }
 
     run(){
         this.isBacktest = false
-        this.proc = fork('./lib/execute.js', [this.pair, this.gran]);
+        this.status = 'running'
+        this.proc = fork('./workers/execute.js', [this.pair, this.gran]);
         this.bind()
     }
 
     backtest(){
         this.isBacktest = true
-        this.proc = fork('./lib/backtest.js', [this.pair, this.gran]);
+        this.status = 'running'
+        this.proc = fork('./workers/backtest.js', [this.pair, this.gran]);
         this.bind()
     }
 
     kill(){
+        this.status = 'dead'
         this.forceKill = true
         this.proc.kill()
     }
@@ -52,24 +50,21 @@ class Worker {
 
         this.proc.on('close', () => {
             that.isRunning = false
+            that.status = 'done'
+            // log
+            that.context.push('backtest', that)
         })
     }
 
     log(msg){
         let jmsg = JSON.parse(msg)
-        switch(jmsg.type){
-            case 'status': this.logger.status[jmsg.key] = jmsg.value
-                break
-            case 'result': this.logger.result[jmsg.key] = jmsg.value
-                break
-            case 'event':
-                break
-            case 'iteration': this.logger.iter.push(jmsg.value)
-                break
+        if(jmsg.type == 'status'){
+            this.logger.status[jmsg.key] = jmsg.value
+        }else if(jmsg.type == 'event'){
+            this.logger.events.push(jmsg.value)
         }
     }
 
 }
-
 
 module.exports = Worker

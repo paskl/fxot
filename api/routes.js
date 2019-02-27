@@ -1,29 +1,35 @@
 /* routes.js */
 
-const controller = require('./controller')
+module.exports = (app, controller) => {
 
-module.exports = function(app) {
-
-  // GET LIST OF STRATEGIES
   app.route('/strategy/list')
-    .get(controller.listStrategy)
+    .get(controller.ctx.listStrategy)
+
+  app.route('/strategy/view/:strategyId')
+    .get(controller.ctx.viewStrategy)
 
   app.route('/strategy/run/:strategyId')
-    .get(controller.runStrategy)
+    .get(controller.wrk.runStrategy)
 
   app.route('/strategy/backtest/:strategyId')
-    .get(controller.backtestStrategy)
+    .get(controller.wrk.backtestStrategy)
 
-  app.route('/workers/list')
-    .get(controller.listWorkers)
+  app.route('/backtest/view/:backtestId')
+    .get(controller.ctx.backtestResult)
+
+  app.route('/worker/list')
+    .get(controller.ctx.listWorkers)
+
+  app.route('/worker/status/:workerId')
+    .get(controller.ctx.workerStatus)
 
   app.route('/worker/kill/:workerId')
-    .get(controller.killWorker)
+    .get(controller.wrk.killWorker)
 
   app.route('/worker/viewLogs/:workerId')
-    .get(controller.viewLogsWorker)
+    .get(controller.ctx.viewLogsWorker)
 
   app.route('/datapoints/:pair')
-    .get(controller.datapoints)
+    .get(controller.dat.datapoints)
 
 }

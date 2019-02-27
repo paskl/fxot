@@ -98,3 +98,34 @@
     .interaction .start, .interaction .end {
         cursor: nwse-resize;
     }
+
+    .lines path.line {
+        fill: none !important;
+        opacity: 1;
+    }
+
+    .line0 path.line{ stroke: #2980b9 !important; }
+    .line1 path.line{ stroke: #e74c3c !important; }
+    .line2 path.line{ stroke: #2c3e50 !important; }
+    .line3 path.line{ stroke: #27ae60 !important; }
+    .line4 path.line{ stroke: #f39c12 !important; }
+
+
+ path.macd {
+        stroke: #0000AA;
+    }
+
+    path.signal {
+        stroke: #FF9999;
+    }
+
+    path.zero {
+        stroke: #BBBBBB;
+        stroke-dasharray: 0;
+        stroke-opacity: 0.5;
+    }
+
+    path.difference {
+        fill: #BBBBBB;
+        opacity: 0.5;
+    }

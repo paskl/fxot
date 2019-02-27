@@ -32,8 +32,3 @@ exports.getById = (id) => {
     })
     return ret
 }
-
-// 2- launch a strategy or backtest
-// 3- view the list of strategy & backtest launched or history
-// 4- view the detail of a strategy and results (in live)
-

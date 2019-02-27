@@ -2,7 +2,7 @@
 
 // const Worker = require('./worker.js')
 const Candle = require('./candle.js')
-const oanda = require('./oanda.js')
+// const oanda = require('./oanda.js')
 
 class Pair {
 

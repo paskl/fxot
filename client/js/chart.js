@@ -1,7 +1,8 @@
 class Chart {
     constructor(options)   {
-        this.margin = options.margin
-        this.container = '#'+options.container
+        options = options || {}
+        this.margin = options.margin || { top: 20, right: 20, bottom: 30, left: 50 }
+        this.container = options.container ? '#'+options.container:'#chart'
 
         this.width = 960 - this.margin.left - this.margin.right
         this.height = 500 - this.margin.top - this.margin.bottom
@@ -11,7 +12,6 @@ class Chart {
 
         this.y = d3.scaleLinear()
             .range([this.height, 0])
-
 
         // runtime function
         this.candlestick = techan.plot.candlestick()
@@ -32,6 +32,10 @@ class Chart {
             // .on("mouseout", out)
             // .on("drag", drag);
 
+        this.line = techan.plot.sma()
+            .xScale(this.x)
+            .yScale(this.y)
+
         this.xAxis = d3.axisBottom()
             .scale(this.x)
 
@@ -48,6 +52,8 @@ class Chart {
         this.svg.append("g").attr("class", "candlestick")
         this.svg.append("g").attr("class", "tradearrow")
         this.svg.append("g").attr("class", "trendlines")
+        for(let i=0; i<10; i++)
+            this.svg.append("g").attr("class", "lines line"+i)
         this.svg.append("g").attr("class", "x axis")
                 .attr("transform", "translate(0," + this.height + ")")
         this.svg.append("g").attr("class", "y axis")
@@ -60,10 +66,9 @@ class Chart {
     }
 
     setData(points) {
-        console.log(points)
+        // console.log(points)
         // this.data = points
         var accessor = this.candlestick.accessor()
-        var that = this
 
         this.data = points.map(function(d) {
             // *******************************************
@@ -86,32 +91,39 @@ class Chart {
     setNotes(notes){
         this.notes = notes
     }
-
     addNote(note){
         if(this.notes) this.notes.push(note)
     }
-
-    setLines(trendlines){
+    setTrendlines(trendlines){
         this.trendlines = trendlines
     }
-
-    addLine(trendline){
+    addTrendLine(trendline){
         if(this.trendlines) this.trendlines.push(trendline)
     }
+    setLines(lines){
+        this.lines = [lines]
+    }
+    addLine(line){
+        this.lines.push(line)
+    }
+
 
     draw() {
         this.x.domain(this.data.map(this.candlestick.accessor().d))
         this.y.domain(techan.scale.plot.ohlc(this.data, this.candlestick.accessor()).domain())
-
-        // draw each svg elems
         this.svg.selectAll("g.candlestick").datum(this.data).call(this.candlestick)
+
         if(this.notes)
             this.svg.selectAll("g.tradearrow").datum(this.notes).call(this.tradearrow)
         if(this.trendlines)
             this.svg.selectAll("g.trendlines").datum(this.trendlines).call(this.trendline) //.call(trendline.drag);
+        if(this.lines){
+            this.lines.forEach( (l, i) => {
+                this.svg.select("g.line"+i).datum(l).call(this.line)
+            })
+        }
         this.svg.selectAll("g.x.axis").call(this.xAxis)
         this.svg.selectAll("g.y.axis").call(this.yAxis)
-
     }
 
 

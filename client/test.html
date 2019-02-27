@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script type="text/javascript">
+    var myData =[
+        [1530438000000,1.167130,1.167210,1.167130,1.167190,0],
+        [1530438060000,1.167210,1.167210,1.167140,1.167150,0],
+        [1530438120000,1.167160,1.167220,1.167150,1.167220,0],
+        [1530438180000,1.167240,1.167280,1.167240,1.167270,0],
+        [1530438240000,1.167260,1.167360,1.167230,1.167270,0],
+        [1530438300000,1.167280,1.167290,1.167200,1.167240,0],
+        [1530438360000,1.167250,1.167310,1.167150,1.167250,0],
+        [1530438420000,1.167260,1.167370,1.167250,1.167330,0],
+        [1530438480000,1.167350,1.167410,1.167350,1.167390,0],
+        [1530438540000,1.167380,1.167410,1.167270,1.167390,0],
+        [1530438600000,1.167400,1.167470,1.167380,1.167410,0],
+        [1530438660000,1.167400,1.167420,1.167380,1.167380,0],
+        [1530438720000,1.167390,1.167420,1.167370,1.167370,0],
+        [1530438780000,1.167370,1.167380,1.167370,1.167380,0],
+        [1530438840000,1.167380,1.167410,1.167340,1.167340,0],
+        [1530438900000,1.167350,1.167380,1.167190,1.167240,0],
+        [1530438960000,1.167220,1.167260,1.167210,1.167250,0],
+        [1530439020000,1.167260,1.167310,1.167230,1.167300,0],
+        [1530439080000,1.167290,1.167320,1.167290,1.167300,0],
+        [1530439140000,1.167290,1.167400,1.167290,1.167360,0],
+        [1530439200000,1.167370,1.167500,1.167370,1.167480,0],
+        [1530439260000,1.167500,1.167640,1.167500,1.167580,0],
+        [1530439320000,1.167550,1.167580,1.167520,1.167580,0],
+        [1530439380000,1.167580,1.167780,1.167570,1.167780,0],
+        [1530439440000,1.167770,1.167860,1.167770,1.167810,0],
+        [1530439500000,1.167770,1.167850,1.167770,1.167810,0],
+        [1530439560000,1.167810,1.167880,1.167790,1.167860,0],
+        [1530439620000,1.167860,1.167890,1.167860,1.167880,0],
+        [1530439680000,1.167880,1.167930,1.167850,1.167930,0],
+        [1530439740000,1.167940,1.168020,1.167940,1.167940,0],
+        [1530439800000,1.167950,1.167970,1.167880,1.167940,0],
+        [1530439860000,1.167930,1.167940,1.167860,1.167940,0],
+        [1530439920000,1.167950,1.168150,1.167950,1.168050,0],
+        [1530439980000,1.168060,1.168190,1.168050,1.168070,0],
+        [1530440040000,1.168090,1.168220,1.168080,1.168130,0],
+        [1530440100000,1.168210,1.168230,1.168130,1.168150,0],
+        [1530440160000,1.168160,1.168180,1.168070,1.168070,0],
+        [1530440220000,1.168050,1.168050,1.167920,1.167920,0],
+        [1530440280000,1.167910,1.167970,1.167820,1.167840,0],
+        [1530440340000,1.167840,1.167880,1.167720,1.167720,0],
+        [1530440400000,1.167740,1.167750,1.167690,1.167730,0],
+        [1530440460000,1.167740,1.167780,1.167740,1.167760,0],
+        [1530440520000,1.167770,1.167790,1.167760,1.167760,0],
+        [1530440580000,1.167750,1.167750,1.167390,1.167390,0],
+        [1530440640000,1.167380,1.167450,1.167300,1.167420,0],
+        [1530440700000,1.167410,1.167440,1.167350,1.167420,0],
+        [1530440760000,1.167390,1.167390,1.167290,1.167310,0],
+        [1530440820000,1.167300,1.167380,1.167300,1.167320,0],
+        [1530440880000,1.167320,1.167370,1.167210,1.167210,0],
+        [1530440940000,1.167240,1.167260,1.167070,1.167120,0]
+    ]
+
+
+</script>
+<style>
+
+    body {
+        font: 10px sans-serif;
+    }
+
+    text {
+        fill: #000;
+    }
+
+    text.symbol {
+        fill: #BBBBBB;
+    }
+
+    path {
+        fill: none;
+        stroke-width: 1;
+    }
+
+    path.candle {
+        stroke: #000000;
+    }
+
+    path.candle.body {
+        stroke-width: 0;
+    }
+
+    path.candle.up {
+        fill: #00AA00;
+        stroke: #00AA00;
+    }
+
+    path.candle.down {
+        fill: #FF0000;
+        stroke: #FF0000;
+    }
+
+    .close.annotation.up path {
+        fill: #00AA00;
+    }
+
+    path.volume {
+        fill: #DDDDDD;
+    }
+
+    .indicator-plot path.line {
+        fill: none;
+        stroke-width: 1;
+    }
+
+    .ma-0 path.line {
+        stroke: #1f77b4;
+    }
+
+    .ma-1 path.line {
+        stroke: #aec7e8;
+    }
+
+    .ma-2 path.line {
+        stroke: #ff7f0e;
+    }
+
+    button {
+        position: absolute;
+        right: 110px;
+        top: 25px;
+    }
+
+    path.macd {
+        stroke: #0000AA;
+    }
+
+    path.signal {
+        stroke: #FF9999;
+    }
+
+    path.zero {
+        stroke: #BBBBBB;
+        stroke-dasharray: 0;
+        stroke-opacity: 0.5;
+    }
+
+    path.difference {
+        fill: #BBBBBB;
+        opacity: 0.5;
+    }
+
+    path.rsi {
+        stroke: #000000;
+    }
+
+    path.overbought, path.oversold {
+        stroke: #FF9999;
+        stroke-dasharray: 5, 5;
+    }
+
+    path.middle, path.zero {
+        stroke: #BBBBBB;
+        stroke-dasharray: 5, 5;
+    }
+
+    .analysis path, .analysis circle {
+        stroke: blue;
+        stroke-width: 0.8;
+    }
+
+    .trendline circle {
+        stroke-width: 0;
+        display: none;
+    }
+
+    .mouseover .trendline path {
+        stroke-width: 1.2;
+    }
+
+    .mouseover .trendline circle {
+        stroke-width: 1;
+        display: inline;
+    }
+
+    .dragging .trendline path, .dragging .trendline circle {
+        stroke: darkblue;
+    }
+
+    .interaction path, .interaction circle {
+        pointer-events: all;
+    }
+
+    .interaction .body {
+        cursor: move;
+    }
+
+    .trendlines .interaction .start, .trendlines .interaction .end {
+        cursor: nwse-resize;
+    }
+
+    .supstance path {
+        stroke-dasharray: 2, 2;
+    }
+
+    .supstances .interaction path {
+        pointer-events: all;
+        cursor: ns-resize;
+    }
+
+    .mouseover .supstance path {
+        stroke-width: 1.5;
+    }
+
+    .dragging .supstance path {
+        stroke: darkblue;
+    }
+
+    .crosshair {
+        cursor: crosshair;
+    }
+
+    .crosshair path.wire {
+        stroke: #DDDDDD;
+        stroke-dasharray: 1, 1;
+    }
+
+    .crosshair .axisannotation path {
+        fill: #DDDDDD;
+    }
+
+    .tradearrow path.tradearrow {
+        stroke: none;
+    }
+
+    .tradearrow path.buy {
+        fill: #0000FF;
+    }
+
+    .tradearrow path.sell {
+        fill: #9900FF;
+    }
+
+    .tradearrow path.highlight {
+        fill: none;
+        stroke-width: 2;
+    }
+
+    .tradearrow path.highlight.buy {
+        stroke: #0000FF;
+    }
+
+    .tradearrow path.highlight.sell {
+        stroke: #9900FF;
+    }
+
+</style>
+<body>
+<button>Reset</button>
+<script src="http://d3js.org/d3.v4.min.js"></script>
+<script src="http://techanjs.org/techan.min.js"></script>
+<script>
+
+
+/***********************************
+    PARAMS
+*************************************/
+var activateZoom = false
+var zoomInit = {start:0, end:null}
+
+
+
+/***************************************/
+
+    var dim = {
+        width: 960, height: 500,
+        margin: { top: 20, right: 50, bottom: 30, left: 50 },
+        ohlc: { height: 305 },
+        indicator: { height: 65, padding: 5 }
+    };
+    dim.plot = {
+        width: dim.width - dim.margin.left - dim.margin.right,
+        height: dim.height - dim.margin.top - dim.margin.bottom
+    };
+    dim.indicator.top = dim.ohlc.height+dim.indicator.padding;
+    dim.indicator.bottom = dim.indicator.top+dim.indicator.height+dim.indicator.padding;
+
+    var indicatorTop = d3.scaleLinear()
+            .range([dim.indicator.top, dim.indicator.bottom]);
+
+    var parseDate = d3.timeParse("%d-%b-%y");
+
+    var zoom = d3.zoom().on("zoom", zoomed);
+
+    var x = techan.scale.financetime()
+            .range([0, dim.plot.width]);
+
+    var y = d3.scaleLinear()
+            .range([dim.ohlc.height, 0]);
+
+
+    var yPercent = y.copy();   // Same as y at this stage, will get a different domain later
+
+    var yInit, yPercentInit, zoomableInit;
+
+    var yVolume = d3.scaleLinear()
+            .range([y(0), y(0.2)]);
+
+    var candlestick = techan.plot.candlestick()
+            .xScale(x)
+            .yScale(y);
+
+    var tradearrow = techan.plot.tradearrow()
+            .xScale(x)
+            .yScale(y)
+            // .y(function(d) {
+            //     // Display the buy and sell arrows a bit above and below the price, so the price is still visible
+            //     if(d.type === 'buy') return y(d.low)+5;
+            //     if(d.type === 'sell') return y(d.high)-5;
+            //     else return y(d.price);
+            // });
+
+    var sma0 = techan.plot.sma()
+            .xScale(x)
+            .yScale(y);
+
+    var sma1 = techan.plot.sma()
+            .xScale(x)
+            .yScale(y);
+
+    var ema2 = techan.plot.ema()
+            .xScale(x)
+            .yScale(y);
+
+    var volume = techan.plot.volume()
+            .accessor(candlestick.accessor())   // Set the accessor to a ohlc accessor so we get highlighted bars
+            .xScale(x)
+            .yScale(yVolume);
+
+    var trendline = techan.plot.trendline()
+            .xScale(x)
+            .yScale(y);
+
+    var supstance = techan.plot.supstance()
+            .xScale(x)
+            .yScale(y);
+
+    var xAxis = d3.axisBottom(x);
+
+    var timeAnnotation = techan.plot.axisannotation()
+            .axis(xAxis)
+            .orient('bottom')
+            .format(d3.timeFormat('%Y-%m-%d'))
+            .width(65)
+            .translate([0, dim.plot.height]);
+
+    var yAxis = d3.axisRight(y);
+
+    var ohlcAnnotation = techan.plot.axisannotation()
+            .axis(yAxis)
+            .orient('right')
+            .format(d3.format(',.2f'))
+            .translate([x(1), 0]);
+
+    var closeAnnotation = techan.plot.axisannotation()
+            .axis(yAxis)
+            .orient('right')
+            .accessor(candlestick.accessor())
+            .format(d3.format(',.2f'))
+            .translate([x(1), 0]);
+
+    var percentAxis = d3.axisLeft(yPercent)
+            .tickFormat(d3.format('+.1%'));
+
+    var percentAnnotation = techan.plot.axisannotation()
+            .axis(percentAxis)
+            .orient('left');
+
+    var volumeAxis = d3.axisRight(yVolume)
+            .ticks(3)
+            .tickFormat(d3.format(",.3s"));
+
+    var volumeAnnotation = techan.plot.axisannotation()
+            .axis(volumeAxis)
+            .orient("right")
+            .width(35);
+
+    var macdScale = d3.scaleLinear()
+            .range([indicatorTop(0)+dim.indicator.height, indicatorTop(0)]);
+
+    var rsiScale = macdScale.copy()
+            .range([indicatorTop(1)+dim.indicator.height, indicatorTop(1)]);
+
+    var macd = techan.plot.macd()
+            .xScale(x)
+            .yScale(macdScale);
+
+    var macdAxis = d3.axisRight(macdScale)
+            .ticks(3);
+
+    var macdAnnotation = techan.plot.axisannotation()
+            .axis(macdAxis)
+            .orient("right")
+            .format(d3.format(',.2f'))
+            .translate([x(1), 0]);
+
+    var macdAxisLeft = d3.axisLeft(macdScale)
+            .ticks(3);
+
+    var macdAnnotationLeft = techan.plot.axisannotation()
+            .axis(macdAxisLeft)
+            .orient("left")
+            .format(d3.format(',.2f'));
+
+    var rsi = techan.plot.rsi()
+            .xScale(x)
+            .yScale(rsiScale);
+
+    var rsiAxis = d3.axisRight(rsiScale)
+            .ticks(3);
+
+    var rsiAnnotation = techan.plot.axisannotation()
+            .axis(rsiAxis)
+            .orient("right")
+            .format(d3.format(',.2f'))
+            .translate([x(1), 0]);
+
+    var rsiAxisLeft = d3.axisLeft(rsiScale)
+            .ticks(3);
+
+    var rsiAnnotationLeft = techan.plot.axisannotation()
+            .axis(rsiAxisLeft)
+            .orient("left")
+            .format(d3.format(',.2f'));
+
+    var ohlcCrosshair = techan.plot.crosshair()
+            .xScale(timeAnnotation.axis().scale())
+            .yScale(ohlcAnnotation.axis().scale())
+            .xAnnotation(timeAnnotation)
+            .yAnnotation([ohlcAnnotation, percentAnnotation, volumeAnnotation])
+            .verticalWireRange([0, dim.plot.height]);
+
+    var macdCrosshair = techan.plot.crosshair()
+            .xScale(timeAnnotation.axis().scale())
+            .yScale(macdAnnotation.axis().scale())
+            .xAnnotation(timeAnnotation)
+            .yAnnotation([macdAnnotation, macdAnnotationLeft])
+            .verticalWireRange([0, dim.plot.height]);
+
+    var rsiCrosshair = techan.plot.crosshair()
+            .xScale(timeAnnotation.axis().scale())
+            .yScale(rsiAnnotation.axis().scale())
+            .xAnnotation(timeAnnotation)
+            .yAnnotation([rsiAnnotation, rsiAnnotationLeft])
+            .verticalWireRange([0, dim.plot.height]);
+
+    var svg = d3.select("body").append("svg")
+            .attr("width", dim.width)
+            .attr("height", dim.height);
+
+    var defs = svg.append("defs");
+
+    defs.append("clipPath")
+            .attr("id", "ohlcClip")
+        .append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", dim.plot.width)
+            .attr("height", dim.ohlc.height);
+
+    defs.selectAll("indicatorClip").data([0, 1])
+        .enter()
+            .append("clipPath")
+            .attr("id", function(d, i) { return "indicatorClip-" + i; })
+        .append("rect")
+            .attr("x", 0)
+            .attr("y", function(d, i) { return indicatorTop(i); })
+            .attr("width", dim.plot.width)
+            .attr("height", dim.indicator.height);
+
+    svg = svg.append("g")
+            .attr("transform", "translate(" + dim.margin.left + "," + dim.margin.top + ")");
+
+    svg.append('text')
+            .attr("class", "symbol")
+            .attr("x", 20)
+            .text("Facebook, Inc. (FB)");
+
+    svg.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + dim.plot.height + ")");
+
+    var ohlcSelection = svg.append("g")
+            .attr("class", "ohlc")
+            .attr("transform", "translate(0,0)");
+
+    ohlcSelection.append("g")
+            .attr("class", "axis")
+            .attr("transform", "translate(" + x(1) + ",0)")
+        .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -12)
+            .attr("dy", ".71em")
+            .style("text-anchor", "end")
+            .text("Price ($)");
+
+    ohlcSelection.append("g")
+            .attr("class", "close annotation up");
+
+    ohlcSelection.append("g")
+            .attr("class", "volume")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    ohlcSelection.append("g")
+            .attr("class", "candlestick")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    ohlcSelection.append("g")
+            .attr("class", "indicator sma ma-0")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    ohlcSelection.append("g")
+            .attr("class", "indicator sma ma-1")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    ohlcSelection.append("g")
+            .attr("class", "indicator ema ma-2")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    ohlcSelection.append("g")
+            .attr("class", "percent axis");
+
+    ohlcSelection.append("g")
+            .attr("class", "volume axis");
+
+    var indicatorSelection = svg.selectAll("svg > g.indicator").data(["macd", "rsi"]).enter()
+             .append("g")
+                .attr("class", function(d) { return d + " indicator"; });
+
+    indicatorSelection.append("g")
+            .attr("class", "axis right")
+            .attr("transform", "translate(" + x(1) + ",0)");
+
+    indicatorSelection.append("g")
+            .attr("class", "axis left")
+            .attr("transform", "translate(" + x(0) + ",0)");
+
+    indicatorSelection.append("g")
+            .attr("class", "indicator-plot")
+            .attr("clip-path", function(d, i) { return "url(#indicatorClip-" + i + ")"; });
+
+    // Add trendlines and other interactions last to be above zoom pane
+    svg.append('g')
+            .attr("class", "crosshair ohlc");
+
+    svg.append("g")
+            .attr("class", "tradearrow")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    svg.append('g')
+            .attr("class", "crosshair macd");
+
+    svg.append('g')
+            .attr("class", "crosshair rsi");
+
+    svg.append("g")
+            .attr("class", "trendlines analysis")
+            .attr("clip-path", "url(#ohlcClip)");
+    svg.append("g")
+            .attr("class", "supstances analysis")
+            .attr("clip-path", "url(#ohlcClip)");
+
+    d3.select("button").on("click", reset);
+
+    // d3.csv("data.csv", function(error, data) {
+
+// *** global data to plot
+var myCandlesticks = []
+var myTrendlines = []
+var mySupstances = []
+var myArrows = []
+
+    var setCandlesticks = (data) => {
+        var accessor = candlestick.accessor()
+        myCandlesticks = data.map(function(d) {
+            return {
+                date: new Date(d[0]),
+                open: +d[1],
+                high: +d[2],
+                low: +d[3],
+                close: +d[4],
+                volume: +d[5]
+            }
+        }).sort(function(a, b) { return d3.ascending(accessor.d(a), accessor.d(b)) })
+    }
+    var setTrendlines = (data) => {
+        myTrendlines = data
+    }
+    var setSupstances = (data) => {
+        mySupstances = data
+    }
+    var setArrows = (data) => {
+        myArrows = data
+    }
+    var setLines = (data) => {
+        myLines = data
+    }
+
+
+    // addNote(note){
+    //     if(this.notes) this.notes.push(note)
+    // }
+    // setTrendlines(trendlines){
+    //     this.trendlines = trendlines
+    // }
+    // addTrendLine(trendline){
+    //     if(this.trendlines) this.trendlines.push(trendline)
+    // }
+    // setLines(lines){
+    //     this.lines = [lines]
+    // }
+    // addLine(line){
+    //     this.lines.push(line)
+    // }
+
+    var suite = () => {
+        // *** setters done
+        var data = myCandlesticks
+
+        //
+        var indicatorPreRoll = 0
+        var accessor = candlestick.accessor()
+
+        x.domain(techan.scale.plot.time(data).domain());
+        y.domain(techan.scale.plot.ohlc(data.slice(indicatorPreRoll)).domain());
+        yPercent.domain(techan.scale.plot.percent(y, accessor(data[indicatorPreRoll])).domain());
+        yVolume.domain(techan.scale.plot.volume(data).domain());
+
+        var macdData = techan.indicator.macd()(data);
+        macdScale.domain(techan.scale.plot.macd(macdData).domain());
+        var rsiData = techan.indicator.rsi()(data);
+        rsiScale.domain(techan.scale.plot.rsi(rsiData).domain());
+
+        svg.select("g.candlestick").datum(data).call(candlestick);
+
+        svg.select("g.close.annotation").datum([data[data.length-1]]).call(closeAnnotation);
+        svg.select("g.volume").datum(data).call(volume);
+        svg.select("g.sma.ma-0").datum(techan.indicator.sma().period(10)(data)).call(sma0);
+        svg.select("g.sma.ma-1").datum(techan.indicator.sma().period(20)(data)).call(sma1);
+        svg.select("g.ema.ma-2").datum(techan.indicator.ema().period(50)(data)).call(ema2);
+        svg.select("g.macd .indicator-plot").datum(macdData).call(macd);
+        svg.select("g.rsi .indicator-plot").datum(rsiData).call(rsi);
+
+        svg.select("g.crosshair.ohlc").call(ohlcCrosshair)//.call(zoom);
+        svg.select("g.crosshair.macd").call(macdCrosshair)//.call(zoom);
+        svg.select("g.crosshair.rsi").call(rsiCrosshair)//.call(zoom);
+        if(activateZoom){
+            svg.select("g.crosshair.ohlc").call(zoom);
+            svg.select("g.crosshair.macd").call(zoom);
+            svg.select("g.crosshair.rsi").call(zoom);
+        }
+
+        svg.select("g.trendlines").datum(myTrendlines).call(trendline).call(trendline.drag);
+        svg.select("g.supstances").datum(mySupstances).call(supstance).call(supstance.drag);
+
+        svg.select("g.tradearrow").datum(myArrows).call(tradearrow);
+
+        // Stash for zooming
+        zoomableInit = x.zoomable().domain([zoomInit.start, zoomInit.end || data.length]).copy();
+
+        yInit = y.copy();
+        yPercentInit = yPercent.copy();
+
+        draw();
+    }
+
+setTrendlines([
+    { start: { date: new Date(2018, 6, 1, 18,45,0), value: 1.1674 },
+    end: { date: new Date(2018, 6, 1, 18,59,0), value: 1.1677 } }
+])
+setSupstances([{ start: new Date(2018, 6, 1, 18,45,0), end: new Date(2018, 6, 1, 18,59,0), value: 1.1673 }])
+setCandlesticks(myData)
+setArrows([{ date: new Date(2018, 6, 1, 19,10,0), type: "buy", price: 1.1679 }])
+setLines()
+
+
+suite()
+
+    function reset() {
+        zoom.scale(1);
+        zoom.translate([0,0]);
+        draw();
+    }
+
+    function zoomed() {
+        x.zoomable().domain(d3.event.transform.rescaleX(zoomableInit).domain());
+        y.domain(d3.event.transform.rescaleY(yInit).domain());
+        yPercent.domain(d3.event.transform.rescaleY(yPercentInit).domain());
+        draw();
+    }
+
+    function draw() {
+        svg.select("g.x.axis").call(xAxis)
+        svg.select("g.ohlc .axis").call(yAxis)
+        svg.select("g.candlestick").call(candlestick)
+
+        svg.select("g.volume.axis").call(volumeAxis);
+        svg.select("g.percent.axis").call(percentAxis);
+        svg.select("g.macd .axis.right").call(macdAxis);
+        svg.select("g.rsi .axis.right").call(rsiAxis);
+        svg.select("g.macd .axis.left").call(macdAxisLeft);
+        svg.select("g.rsi .axis.left").call(rsiAxisLeft);
+
+        // We know the data does not change, a simple refresh that does not perform data joins will suffice.
+        svg.select("g.close.annotation").call(closeAnnotation.refresh);
+        svg.select("g.volume").call(volume.refresh);
+        svg.select("g .sma.ma-0").call(sma0.refresh);
+        svg.select("g .sma.ma-1").call(sma1.refresh);
+        svg.select("g .ema.ma-2").call(ema2.refresh);
+        svg.select("g.macd .indicator-plot").call(macd.refresh);
+        svg.select("g.rsi .indicator-plot").call(rsi.refresh);
+        svg.select("g.crosshair.ohlc").call(ohlcCrosshair.refresh);
+        svg.select("g.crosshair.macd").call(macdCrosshair.refresh);
+        svg.select("g.crosshair.rsi").call(rsiCrosshair.refresh);
+        svg.select("g.trendlines").call(trendline.refresh);
+        svg.select("g.supstances").call(supstance.refresh);
+        svg.select("g.tradearrow").call(tradearrow.refresh);
+    }
+
+
+</script>
