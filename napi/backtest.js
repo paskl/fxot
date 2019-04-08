@@ -4,12 +4,13 @@ const TI = require('technicalindicators')
 const fs = require('fs')
 
 const Pair = require('../classes/pair.js')
-const oanda = require('../lib/oanda.js')
-const localdata = require('../lib/localdata.js')
-const logger = require('../workers/logger')
+const connector = require('../napi/connector.js')
 
-let limit = 300
+const logger = require('../workers/logger')
+const oanda = require('../lib/oanda.js')
+
 let cursor = 0
+let limit = 300
 let counter = 0
 
 let iterations = []
@@ -17,16 +18,34 @@ let events = []
 
 let trades = []
 let wallet = 0
+let audit = []
 
 // PARAMS
 let stratId = process.argv[2]
 let instrument = process.argv[3]
 let granulity = process.argv[4]
-// let instrument = 'EUR_JPY'
-// let granulity = 'S5'
+let from = process.argv[5]
+let to = process.argv[6]
+
+console.log(stratId)
+console.log(instrument)
+console.log(granulity)
+
+let pair = new Pair(instrument, granulity)
+let candles = connector.getCandles(instrument, granulity, from, to)
 
 
-// Create Trade
+// Get the strategy
+var getStrategy = (stratId) => {
+    let loc = './strategies/'+stratId+'.js'
+    let content = fs.readFileSync(loc, 'utf8')
+    let temp = eval(content)
+    if(typeof(temp) != 'function') console.log('ERROR')
+    return temp
+}
+var strategy = getStrategy(stratId)
+
+// Trade
 var Trade = {
     long: (market) => {
         trades.push({type:'long', status:'open', open_at: market.candle.time, price: market.candle.close})
@@ -46,75 +65,27 @@ var Trade = {
     }
 }
 
-// Create Event
-var Event = {
-    buy: (market) => {
-        events.push({type:'buy', time: market.candle.time, price: market.candle.close })
-        let g = Trade.close('short', market) *1000
-        Trade.long(market)
-        wallet += g
+// Log
+var Log = {
+    audit: [],
+    add: (key, value) => {
+        Log.audit.push( [key,value] )
     },
-    sell: (market) => {
-        events.push({type:'sell', time: market.candle.time, price: market.candle.close })
-        let g = Trade.close('long', market) *1000
-        Trade.short(market)
-        wallet += g
+    commit: () => {
+        Log.audit.forEach( l => {
+            process.send( JSON.stringify({ key: l[0], value: l[1]}) )
+        })
     }
 }
 
 
-var getStrategy = (stratId) => {
-    let loc = './strategies/'+stratId+'.js'
-    let content = fs.readFileSync(loc, 'utf8')
-    let temp = eval(content)
-    if(typeof(temp) != 'function') console.log('ERROR')
-    return temp
+// Iteration
+Log.add('start', new Date().getTime())
+while( cursor++ < candles.length-limit-1 ){
+    pair.update(candles.slice(cursor, cursor+limit) , 'LOCAL')
+    strategy(pair)
 }
+Log.add('end', new Date().getTime())
+Log.add('counter', cursor)
 
-// Strategy
-var strategy = getStrategy(stratId)
-
-// START
-logger.status('run_start', new Date().getTime())
-
-//
-let pair = new Pair(instrument, granulity)
-let candles = localdata.candles(instrument, granulity, cursor++, limit)
-pair.update(candles, 'LOCAL')
-
-//
-logger.status('sample_start', candles[0][0])
-logger.status('pair', instrument)
-
-var strategy = getStrategy(stratId)
-
-
-while(candles.length == limit){
-    // prepare data
-    let market = {}
-    market.candle = pair.lastCandle()
-    market.sma10 = parseFloat(TI.SMA.calculate({period : 50, values : pair.closes(50)})).toFixed(5)
-    market.sma40 = parseFloat(TI.SMA.calculate({period : 200, values : pair.closes(200)})).toFixed(5)
-    market.delta = (market.sma10 - market.sma40) > 0
-
-    // Run iteration
-    if(counter > 0)
-        strategy(market)
-
-    // next
-    iterations[counter] = market
-    candles = localdata.candles(instrument, granulity, cursor++, limit)
-    pair.update(candles, 'LOCAL')
-    counter++
-}
-
-// console.log(trades)
-
-// END
-console.log(wallet)
-events.forEach( e => logger.event(e) )
-
-logger.status('nb_iter', counter)
-logger.status('sample_done', candles[candles.length-2][0])
-logger.status('run_done', new Date().getTime())
-console.log('backtest DONE')
+Log.commit()

@@ -16,7 +16,7 @@ class Worker {
         this.status = 'new'
         //
         this.context = context
-        this.logger = { status: {}, events: [] }
+        this.logs = []
         // this.audit = new Logger()
         // this.wallet = new W allet()
     }
@@ -24,14 +24,14 @@ class Worker {
     run(){
         this.isBacktest = false
         this.status = 'running'
-        this.proc = fork('./workers/execute.js', [this.stratId, this.pair, this.gran]);
+        this.proc = fork('./workers/execute.js', [this.stratId, this.pair, this.gran])
         this.bind()
     }
 
-    backtest(){
+    backtest(from, to){
         this.isBacktest = true
         this.status = 'running'
-        this.proc = fork('./napi/backtest.js', [this.stratId, this.pair, this.gran]);
+        this.proc = fork('./napi/backtest.js', [this.stratId, this.pair, this.gran, from, to])
         this.bind()
     }
 
@@ -46,7 +46,7 @@ class Worker {
         this.isRunning = true
 
         this.proc.on('message', msg => {
-            that.log(msg)
+            that.logs.push(msg)
         })
 
         this.proc.on('close', () => {
@@ -57,25 +57,15 @@ class Worker {
         })
     }
 
-    log(msg){
-        let jmsg = JSON.parse(msg)
-        if(jmsg.type == 'status'){
-            this.logger.status[jmsg.key] = jmsg.value
-        }else if(jmsg.type == 'event'){
-            this.logger.events.push(jmsg.value)
-        }
-    }
-
 }
-
 
 // SCHEDULER
 const that = {
     workers: [],
     workerIndex: {},
-    backtest: (context, stratId, pair, gran) => {
+    backtest: (context, stratId, pair, gran, from, to) => {
         let w = new Worker(context, stratId, pair, gran)
-        w.backtest()
+        w.backtest(from, to)
         let ind = that.workers.push(w) - 1
         that.workerIndex[w.id] = ind
         return w

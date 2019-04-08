@@ -1,5 +1,7 @@
 /* connector.js */
 
+const fs = require('fs')
+
 const strats =  [
     {
         id: 'strateg01',
@@ -11,56 +13,100 @@ const strats =  [
     }
 ]
 
+var data = {}
+
+//date opeartions
+var stou = s => { return (new Date(s).getTime() - new Date(s).getTimezoneOffset()*1000*60) }
+var itom = i => { return (i<10) ? '0'+i : i.toString() }
+
 var localData = {
-    data:{},
-    // has(year):{},
-    getIndex: (d) => {
-        return ( d - new Date(d.getFullYear()) ) / 1000 / 60
-    },
-    getDistance: (d1, d2) => {
-        return (d2 - d1) / 1000 / 60
-    }
-    get: (from, to) => {
-        let ind, limit
-        let res = []
-        let diffYear = to.getFullYear() - from.getFullYear()
+    load: (instrument, year) => {
+        console.log('LOADING: '+instrument+', M1,'+ year)
+        let filename = instrument+'/DAT_ASCII_'+instrument+'_M1_'+year+'.csv'
+        contents = fs.readFileSync('./data/'+filename, 'utf8')
+        if(!data[instrument]) data[instrument] = {}
+        data[instrument][year] = {}
+        contents.split('\n').forEach( (l, i) => {
+            u = l.split(';')
+            y = u[0].substr(0,4)
+            mo = u[0].substr(4,2)
+            d = u[0].substr(6,2)
+            h = u[0].substr(9,2)
+            mi = u[0].substr(11,2)
+            s = u[0].substr(13,2)
+            u[0] = new Date( Date.UTC(y, parseInt(mo)-1, d, h, mi, s) ).getTime()
 
-
-        // if(from>to)
-        //     console.log('ERROR') && return
-        // if(!data[instrument] || !data[instrument][f.getFullYear()])
-        //   // get year for from
-        // if(!data[instrument[t.getFullYear()]])
-        //     // get year
-
-
-        if(diffYear == 0){
-            res = data[from.getFullYear()][ this.getIndex(from) ].splice( this.getDistance(from, to) )
-        }
-        else{
-            res = data[from.getFullYear()][ this.getIndex(from) ].splice(data[from.getFullYear()].length - this.getIndex(from))
-            for( let i = 1; i<diffYear-1; i++){
-                res.push( data[from.getFullYear()+i] )
+            if(u.length == 6){
+                if(!data[instrument][year][mo]) data[instrument][year][mo] = {}
+                if(!data[instrument][year][mo][d]) data[instrument][year][mo][d] = []
+                data[instrument][year][mo][d].push(u)
             }
-            res.push(data[to.getFullYear()][0].splice(this.getIndex(to)))
+
+        })
+
+    },
+
+
+    getDay: (instrument, year, month, day) => {
+        if( !data[instrument] )
+            data[instrument] = {}
+        if(!data[instrument][year])
+            localData.load(instrument, year)
+        return data[instrument][year][month][day]
+    },
+
+    getMonth: (instrument, year, month) => {
+        if( !data[instrument] )
+            data[instrument] = {}
+        if(!data[instrument][year])
+            localData.load(instrument, year)
+        let res = []
+        // remove keys and flatten in res
+        for(let i=1; i<32; i++){
+            let ii = itom(i)
+            if( data[instrument][year][month][ii] ){
+                data[instrument][year][month][ii].forEach( j => {
+                    res.push(j)
+                })
+            }
         }
 
         return res
-
     }
 }
 
 module.exports = {
 
+    // Return the existing strategies in the system
     getPublicStrategies: () => {
         return strats
-    }
+    },
 
-    getCandles: (f, t, instrument, granulity) => {
-        let from = new Date(f)
-        let to = new Date(t)
+    // Return the dummy candle for backtesting
+    getCandles: (instrument, granulity, f, t) => {
+        let searchYear  = f.split('-')[0]
+        let searchMonth = f.split('-')[1]
+        let toYear  = t.split('-')[0]
+        let toMonth = t.split('-')[1]
 
+        let res = []
 
+        // add a month to target
+        toMonth = itom( parseInt(toMonth)+1 )
+        if(toMonth > 12){
+            toYear = (parseInt(toYear) + 1).toString()
+            toMonth = '01'
+        }
+
+        while( searchMonth != toMonth || searchYear != toYear ){
+            res = res.concat( localData.getMonth(instrument, searchYear, searchMonth) )
+            searchMonth = itom( parseInt(searchMonth)+1 )
+            if(searchMonth > 12){
+                searchYear = (parseInt(searchYear) + 1).toString()
+                searchMonth = '01'
+            }
+        }
+        return res
     }
 
 }

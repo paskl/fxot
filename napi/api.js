@@ -46,7 +46,11 @@ module.exports = {
         app.route('/worker/backtest/:strategyId').get(
             function (req, res) {
                 let stratId = req.params.strategyId
-                let w = Scheduler.backtest(public, stratId, 'EUR_JPY', 'S5')
+                let instrument = 'EURJPY'
+                let granulity = 'M1'
+                let from = '2018-01'
+                let to ='2018-03'
+                let w = Scheduler.backtest(public, stratId, instrument, granulity, from, to)
                 let wid = w ? w.id : null
                 res.json({id: wid})
             }
@@ -68,7 +72,7 @@ module.exports = {
         app.route('/backtest/result/:backtestId').get(
             function (req, res) {
                 let backtest = public.findById('backtest', req.params.backtestId)
-                res.json({ backtest: backtest.logger })
+                res.json({ backtest: backtest.logs })
             }
         )
 
