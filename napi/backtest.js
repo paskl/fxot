@@ -3,10 +3,9 @@
 const TI = require('technicalindicators')
 const fs = require('fs')
 
-const Pair = require('../classes/pair.js')
+const Pair = require('../napi/pair.js')
 const connector = require('../napi/connector.js')
 
-const logger = require('../workers/logger')
 const oanda = require('../lib/oanda.js')
 
 let cursor = 0
