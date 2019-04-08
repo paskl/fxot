@@ -3,10 +3,10 @@
 const TI = require('technicalindicators')
 const fs = require('fs')
 
-const Pair = require('../napi/pair.js')
-const connector = require('../napi/connector.js')
+const Pair = require('../api/pair.js')
+const connector = require('../api/connector.js')
 
-const oanda = require('../lib/oanda.js')
+// const oanda = require('../lib/oanda.js')
 
 let cursor = 0
 let limit = 300

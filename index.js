@@ -3,7 +3,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
 //
-const api = require('./napi/api')
+const api = require('./api/api')
 // const controller = require('./controller')
 // const routes = require('./routes')
 const bodyParser = require('body-parser')
@@ -20,9 +20,3 @@ api.init(app)
 app.listen(port)
 
 console.log('fxot API server started on: ' + port)
-
-
-// TEST
-// const c = require('./napi/connector')
-// let data = c.getCandles('USDJPY', 'M1', '2018-01', '2018-12')
-

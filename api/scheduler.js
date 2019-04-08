@@ -31,7 +31,7 @@ class Worker {
     backtest(from, to){
         this.isBacktest = true
         this.status = 'running'
-        this.proc = fork('./napi/backtest.js', [this.stratId, this.pair, this.gran, from, to])
+        this.proc = fork('./api/backtest.js', [this.stratId, this.pair, this.gran, from, to])
         this.bind()
     }
 
