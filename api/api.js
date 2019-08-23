@@ -1,107 +1,162 @@
 /* api.js */
 
-const Context = require('./context')
-const Connector = require('./connector')
-const Scheduler = require('./scheduler')
+const Connector = require('./lib/connector')
+const Strategy = require('./class/strategy')
+const Worker = require('./class/worker')
 
+//*************************************************************    OBJECTS
+var strategies = []
+var workers = []
 
-module.exports = {
-    init: (app) => {
+//*************************************************************    ENDPOINTS
+var endpoints = [
+    {
+        URL: '/strategy/list',
+        fn: function(req, res){
+            res.json( Strategy_List() )
+        }
+    },
+    {
+        URL: '/strategy/view/:strategyId',
+        fn: function(req, res){
+            res.json( Strategy_View(req.params.strategyId) )
+        }
+    },
+    {
+        URL: '/backtest/start/:strategyId',
+        fn: function(req, res){
+            let wid = Backtest_Start( req.params.strategyId, 'EURJPY', 'M1', 1522548000000, 1523757600000 )
+            res.json({id: wid})
+        }
+    },
+    {
+        URL: '/backtest/view/:stratId/:backtestId',
+        fn: function(req, res){
+            let backtest = Backtest_View( req.params.stratId, req.params.backtestId )
+            let response = backtest ? backtest.result() : {error:'not found'}
+            res.json(response)
+        }
+    },
+    {
+        URL: '/marketdata/view/',
+        fn: function(req, res){
+            let from = parseInt(req.query.from) || 1522548000000
+            let limit = parseInt(req.query.limit) || 300
+            let data = MarketData_View('EURJPY', 'M1', limit, from )
+            res.json({data:data})
+        }
+    },
 
-// *********************************************************************************
-
-        var public = new Context()
-        public.set('strategy', Connector.getPublicStrategies())
-
-
-// *********************************************************************************
-
-// STRATEGY
-
-        app.route( '/strategy/list' ).get(
-            function(req, res) {
-                let list = public.get('strategy').map( s =>{ return {id:s.id, name:s.name} })
-                let ret = {list: list}
-                res.json(ret)
+    {
+        URL: '/run/start/:strategyId/:accountId',
+        fn: function(req, res){
+            if( req.params.accountId == 'dry'){
+                Run_Start( req.params.strategyId, 'EURJPY', 'M1', req.params.accountId)
             }
-        )
-
-        app.route( '/strategy/view/:strategyId' ).get(
-            function(req, res) {
-                let strat = public.findById('strategy', req.params.strategyId)
-                res.json( strat )
-            }
-        )
-
-
-// WORKER
-
-        app.route('/worker/run/:strategyId').get(
-            function(req, res) {
-                console.log('running real strategy')
-                res.json( {code: 0} )
-            }
-        )
-
-        app.route('/worker/backtest/:strategyId').get(
-            function (req, res) {
-                let stratId = req.params.strategyId
-                let instrument = 'EURJPY'
-                let granulity = 'M1'
-                let from = '2018-01'
-                let to ='2018-03'
-                let w = Scheduler.backtest(public, stratId, instrument, granulity, from, to)
-                let wid = w ? w.id : null
-                res.json({id: wid})
-            }
-        )
-
-        app.route('/worker/status/:workerId').get(
-            function (req, res) {
-                let worker = Scheduler.getWorker(req.params.workerId)
-                res.json({
-                    id: worker.id,
-                    status: worker.status
-                })
-            }
-        )
-
-
-// BACKTEST
-
-        app.route('/backtest/result/:backtestId').get(
-            function (req, res) {
-                let backtest = public.findById('backtest', req.params.backtestId)
-                res.json({ backtest: backtest.logs })
-            }
-        )
-
-/*
-        // VIEW A STRATEGY
-        app.route('/strategy/view/:strategyId')
-        .get( (req, res) => {
-
-        })
-          // app.route('/worker/kill/:workerId')
-          //   .get(controller.wrk.killWorker)
-
-
-        // VIEW A STRATEGY
-        app.route('/strategy/view/:strategyId')
-        .get( (req, res) => {
-
-        })
-          // app.route('/worker/viewLogs/:workerId')
-          //   .get(controller.ctx.viewLogsWorker)
-
-        // VIEW A STRATEGY
-        app.route('/strategy/view/:strategyId')
-        .get( (req, res) => {
-
-        })
-          // app.route('/datapoints/:pair')
-          //   .get(controller.dat.datapoints)
-
-*/
+            res.json({id: req.params.strategyId})
+        }
+    },
+    {
+        URL: '/run/view/:stratId',
+        fn: function(req, res){
+            let run = Run_View( req.params.stratId )
+            let response = run ? run.result() : {error:1}
+            res.json(response)
+        }
+    },
+    {
+        URL: '/run/stop/:stratId',
+        fn: function(req, res) {
+            Run_Stop( req.params.stratId )
+            res.json({msg:'done'})
+        }
     }
+]
+
+//*************************************************************    METHODS
+var findStrategyById = (id) => {
+    return strategies.find( e => e.id == id )
 }
+var findWorkerById = (id) => {
+    return workers.find( e => e.id == id )
+}
+
+
+var Strategy_List = () => {
+    return strategies.map( s =>{ return {id:s.id, name:s.name} })
+}
+
+var Strategy_View = (id) => {
+    return findStrategyById(id)
+}
+
+var Backtest_Start = (sid, inst, gran, from, to) => {
+    let strat = findStrategyById (sid)
+    let backtest = strat.createBacktest(inst, gran, from, to)
+    let worker = new Worker(backtest, strat.id, inst, gran)
+    worker.backtest(from, to)
+    workers.push( worker )
+    return ( backtest ? backtest.id : null )
+}
+
+var Backtest_View = (sid, bid) => {
+    let strat = findStrategyById(sid)
+    let bckt = strat.getBacktest(bid)
+    return bckt
+}
+
+var Run_Start = (sid, inst, gran, account) => {
+    let strat = findStrategyById(sid)
+    let run = strat.startRun( inst, gran, account )
+    // Run created only if not only running
+    let worker
+    if(run){
+        worker = new Worker(run, strat.id, inst, gran)
+        worker.run(account)
+        workers.push(worker)
+    }
+    return ( worker ? worker.id : null )
+}
+
+var Run_View = (sid) => {
+    let strat = findStrategyById(sid)
+    return strat.run
+}
+
+var Run_Stop = (sid) => {
+    let strat = findStrategyById(sid)
+    let worker = findWorkerById(strat.run.wid)
+    worker.kill()
+}
+
+var MarketData_View = (inst, gran, limit, from) => {
+    let res =  Connector.LocalCandle.get(inst, gran, from, limit)
+    return res
+}
+
+//*************************************************************    INIT
+var init_Strategies = () => {
+    Connector.Strategy.all().forEach ( s => {
+        strategies.push( new Strategy(s.id, s.name) )
+    })
+}
+
+var init_Endpoints = (app) => {
+    endpoints.forEach ( ep => {
+        app.route( ep.URL ).get( ep.fn )
+    })
+}
+
+//*************************************************************    TEST CODE
+var test = () => {
+    let ret = Connector.LocalCandle.get('EURUSD', 'M1', 1514888100000, 15)
+    console.log(ret)
+}
+
+//*************************************************************    EXPORT
+module.exports = (app) => {
+    init_Strategies()
+    init_Endpoints( app )
+    // test()
+}
+

@@ -1,0 +1,24 @@
+
+<div class="container c-top">
+
+    <div class="strategy-item" *ngFor="let strategy of strategies">
+        <div class="card">
+             <a routerLink="/strategy/{{strategy.id}}">
+                    <!-- Card Header -->
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">{{strategy.name}}</h6>
+                    </div>
+                    <!-- Card Body -->
+                    <div class="card-body">
+                        <div>
+                            BLABLALALALALALA<br>
+                            NBANBALALA
+                        </div>
+                        <div class="mt-4 text-center small">
+                            <span class="mr-2"> Footer </span>
+                        </div>
+                    </div>
+            </a>
+        </div>
+    </div>
+</div>

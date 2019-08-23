@@ -1,0 +1,18 @@
+<div *ngIf="strategy">
+    <h2>{{strategy.name | uppercase}} Details</h2>
+    <div>
+        <span>id: </span>{{strategy.id}}
+    </div>
+    <div>
+        <button (click)="backtest()">Backtest</button>
+        <br>
+        <select [(ngModel)]="selectedAccount">
+            <option *ngFor="let c of accounts" [ngValue]="c">{{c.name}}</option>
+        </select>
+        <button (click)="run()">Run</button>
+        <br>
+        <a routerLink="/run/{{strategy.id}}">
+            <span class=""> See run </span>
+        </a>
+    </div>
+</div>

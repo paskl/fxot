@@ -1,0 +1,28 @@
+
+<div class="container-fluid">
+    <div *ngIf="backtest && backtest.status == 'running'">
+        backtesting in PROGRESS <br> hold on ! <br>
+        test id : {{backtest.id}}
+    </div>
+
+    <div *ngIf="backtest && backtest.status == 'done'">
+        <h3>Statistics</h3>
+        Initialization: {{ backtest.stats.start - backtest.stats.init }}ms <br>
+        Duration: {{backtest.stats.end - backtest.stats.start}}ms <br>
+        Iteration: {{ backtest.stats.iteration }} <br><br>
+
+        <h3>Events</h3>
+        <div >
+            <button (click)="moveChart(-1)">Prev</button>
+            <span> {{ this.timestamp}} </span>
+            <button (click)="moveChart(1)">Next</button>
+        </div>
+        <div class="chartWithOverlay" style="position:relative">
+            <google-chart [data]="lineChart" (chartReady)='ready($event)'></google-chart>
+            <div class="overlay" style="position:absolute; top:0" *ngFor="let down of arrows">
+                <i [class]="down.cls" [style.left.px]="down.left" style="position:absolute"></i>
+            </div>
+        </div>
+    </div>
+</div>
+

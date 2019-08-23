@@ -4,8 +4,6 @@ const app = express()
 const port = process.env.PORT || 3000
 //
 const api = require('./api/api')
-// const controller = require('./controller')
-// const routes = require('./routes')
 const bodyParser = require('body-parser')
 
 app.use(bodyParser.urlencoded({ extended: true }))
@@ -16,7 +14,7 @@ app.use(function(req, res, next) {
     next()
 })
 
-api.init(app)
+api(app)
 app.listen(port)
 
 console.log('fxot API server started on: ' + port)
